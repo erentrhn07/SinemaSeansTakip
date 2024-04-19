@@ -1,0 +1,140 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SQLite;
+using System.Data.Entity;
+using System.Runtime.Remoting.Contexts;
+
+namespace sinemaseanstakipuygulama
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+            dbContext = new ApplicationContext();
+            dataGridView1.AutoGenerateColumns = false;
+            dataGridView2.AutoGenerateColumns = false;
+            dataGridView3.AutoGenerateColumns = false;
+            RefreshDataGridViews();
+        }
+        private void RefreshDataGridViews()
+        {
+            dbContext.Filmler.Load();
+            dataGridView1.DataSource = dbContext.Filmler.Local.ToBindingList();
+
+            dbContext.Salonlar.Load();
+            dataGridView2.DataSource = dbContext.Salonlar.Local.ToBindingList();
+
+            dbContext.Seanslar.Include("Film").Include("Salon").Load();
+            dataGridView3.DataSource = dbContext.Seanslar.Local.ToBindingList();
+        }
+
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("TabPage 1'e tıklandı!");
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            int rowIndex = e.RowIndex;
+            int colIndex = e.ColumnIndex;
+            MessageBox.Show("DataGridView1 hücresinde içerik değişti. Satır: " + rowIndex + ", Sütun: " + colIndex);
+        }
+
+        private void dataGridView3_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            int rowIndex = e.RowIndex;
+            int colIndex = e.ColumnIndex;
+            MessageBox.Show("DataGridView3 hücresinde içerik değişti. Satır: " + rowIndex + ", Sütun: " + colIndex);
+        }
+
+        private void dataGridView2_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            int rowIndex = e.RowIndex;
+            int colIndex = e.ColumnIndex;
+            MessageBox.Show("DataGridView2 hücresinde içerik değişti. Satır: " + rowIndex + ", Sütun: " + colIndex);
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            string girilenMetin = textBox1.Text;
+            MessageBox.Show("Girilen metin: " + girilenMetin);
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            string girilenMetin = textBox2.Text;
+            MessageBox.Show("Girilen metin: " + girilenMetin);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Film yeniFilm = new Film { FilmAdi = textBox1.Text, SeansSaatleri = textBox2.Text };
+            dbContext.Filmler.Add(yeniFilm);
+            dbContext.SaveChanges();
+            RefreshDataGridViews();
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            string girilenMetin = textBox3.Text;
+            MessageBox.Show("Girilen metin: " + girilenMetin);
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            int secilenSayi = (int)numericUpDown1.Value;
+            MessageBox.Show("Seçilen sayı: " + secilenSayi);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Salon yeniSalon = new Salon { SalonAdi = textBox3.Text, KoltukKapasitesi = (int)numericUpDown1.Value };
+            dbContext.Salonlar.Add(yeniSalon);
+            dbContext.SaveChanges();
+            RefreshDataGridViews();
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            string secilenTarih = dateTimePicker1.Value.ToShortDateString();
+            MessageBox.Show("Seçilen tarih: " + secilenTarih);
+        }
+
+        private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string secilenItem = comboBox4.SelectedItem.ToString();
+            MessageBox.Show("Seçilen öğe: " + secilenItem);
+        }
+
+        private void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string secilenItem = comboBox5.SelectedItem.ToString();
+            MessageBox.Show("Seçilen öğe: " + secilenItem);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Film seciliFilm = dataGridView1.SelectedRows[0].DataBoundItem as Film;
+            Salon seciliSalon = dataGridView2.SelectedRows[0].DataBoundItem as Salon;
+            DateTime seciliTarihSaat = dateTimePicker1.Value;
+
+            Seans yeniSeans = new Seans
+            {
+                FilmID = seciliFilm.FilmID,
+                SalonID = seciliSalon.SalonID,
+                TarihSaat = seciliTarihSaat
+            };
+            dbContext.Seanslar.Add(yeniSeans);
+            dbContext.SaveChanges();
+            RefreshDataGridViews();
+        }
+    }
+}
